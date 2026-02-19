@@ -25,5 +25,8 @@ structlog==24.1.0
 tenacity==8.2.0
 numpy==1.26.0
 
+# Server
+gunicorn==21.2.0
+
 # Cache (optional, graceful fallback)
 redis==5.0.1
