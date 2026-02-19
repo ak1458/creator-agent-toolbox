@@ -1,7 +1,7 @@
 ﻿from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -17,19 +17,30 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     debug: bool = Field(default=False, alias="DEBUG")
 
-    openai_api_key: str
+    openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_base_url: str = Field(default="https://api.groq.com/openai/v1", alias="OPENAI_BASE_URL")
     llm_provider: str = Field(default="openai", alias="LLM_PROVIDER")
-    
+
+    # Local/provider-specific generation config
+    ollama_base_url: str = Field(default="http://localhost:11434", alias="OLLAMA_BASE_URL")
+    ollama_script_model: str = Field(default="llama3.2", alias="OLLAMA_SCRIPT_MODEL")
+    ollama_timeout_seconds: int = Field(default=10, alias="OLLAMA_TIMEOUT_SECONDS")
+
     # Database - use Render disk path in production
     database_url: str = Field(
         default="sqlite:///./data/app.db",
         alias="DATABASE_URL",
     )
-    checkpoint_db: str = Field(
-        default="./data/checkpoints.db",
-        alias="CHECKPOINT_DB",
+    checkpoint_db_url: str = Field(
+        default="sqlite:///./data/checkpoints.db",
+        validation_alias=AliasChoices("CHECKPOINT_DB_URL", "CHECKPOINT_DB"),
     )
+    allowed_origins: str = Field(default="http://localhost:5173,http://localhost:3000", alias="ALLOWED_ORIGINS")
+
+    # Thumbnail generation
+    pollinations_base_url: str = Field(default="https://image.pollinations.ai/prompt", alias="POLLINATIONS_BASE_URL")
+    thumbnail_width: int = Field(default=1280, alias="THUMBNAIL_WIDTH")
+    thumbnail_height: int = Field(default=720, alias="THUMBNAIL_HEIGHT")
 
     # Redis configuration
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
