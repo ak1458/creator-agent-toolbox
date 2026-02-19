@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "cat-backend"
+version = "0.1.0"
+description = "Creator Agent Toolbox"
+authors = ["Your Name <you@example.com>"]
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.0"
+uvicorn = { extras = ["standard"], version = "^0.27.0" }
+langgraph = "^0.0.50"
+langchain = "^0.1.0"
+langchain-openai = "^0.0.5"
+sqlmodel = "^0.0.14"
+aiosqlite = "^0.19.0"
+asyncpg = "^0.29.0"  # PostgreSQL async driver
+redis = { extras = ["hiredis"], version = "^5.0.0" }  # Redis client with hiredis parser
+alembic = "^1.13.0"  # Database migrations
+pyjwt = { extras = ["crypto"], version = "^2.8.0" }  # JWT authentication
+python-jose = { extras = ["cryptography"], version = "^3.3.0" }  # Alternative JWT library
+passlib = { extras = ["bcrypt"], version = "^1.7.4" }  # Password hashing
+gunicorn = "^21.2.0"  # Production WSGI server
+pydantic-settings = "^2.1.0"
+python-multipart = "^0.0.6"
+httpx = "^0.26.0"
+structlog = "^24.1.0"
+
+# Phase 6: Real APIs
+google-auth = "^2.27.0"  # YouTube OAuth
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
+google-api-python-client = "^2.118.0"  # YouTube Data API
+requests = "^2.31.0"  # For Perplexity API calls
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+black = "^24.0.0"
+ruff = "^0.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
