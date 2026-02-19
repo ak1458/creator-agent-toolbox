@@ -1,0 +1,17 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+
+# Env
+backend/.env
+
+# Local data
+data/
+
+# IDE
+.vscode/
+.idea/
