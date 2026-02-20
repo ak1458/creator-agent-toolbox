@@ -5,9 +5,19 @@ __pycache__/
 *.pyd
 .pytest_cache/
 .ruff_cache/
+venv/
+.venv/
+.venv-build/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
 
 # Env
 backend/.env
+frontend/.env
 
 # Local data
 data/
