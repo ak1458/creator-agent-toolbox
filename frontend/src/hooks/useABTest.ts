@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../api/client'
 import type { ABTestStatus } from '../types/abtest'
+import { toast } from 'react-hot-toast'
 
 const POLL_INTERVAL = 5000 // 5 seconds for real-time feel
 
@@ -38,7 +39,11 @@ export const useABTest = (workflowId: string | undefined) => {
       // Invalidate and refetch immediately
       queryClient.invalidateQueries({ queryKey: ['ab-test', workflowId] })
       queryClient.invalidateQueries({ queryKey: ['workflow', workflowId] })
+      toast.success('Winner declared manually!')
     },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Error declaring winner')
+    }
   })
 
   // Stop test early
@@ -52,7 +57,11 @@ export const useABTest = (workflowId: string | undefined) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ab-test', workflowId] })
+      toast.success('Test stopped early. Winner selected based on best CTR.')
     },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Error stopping test')
+    }
   })
 
   // Auto-redirect effect when complete

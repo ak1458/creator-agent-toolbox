@@ -18,21 +18,25 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False, alias="DEBUG")
 
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
-    openai_base_url: str = Field(default="https://api.groq.com/openai/v1", alias="OPENAI_BASE_URL")
-    llm_provider: str = Field(default="openai", alias="LLM_PROVIDER")
+    openai_base_url: str = Field(default="https://api.openai.com/v1", alias="OPENAI_BASE_URL")
+    llm_provider: str = Field(default="ollama", alias="LLM_PROVIDER")
+
+    # Real APIs (Phase 6)
+    perplexity_api_key: str = Field(default="", alias="PERPLEXITY_API_KEY")
+    youtube_api_key: str = Field(default="", alias="YOUTUBE_API_KEY")
 
     # Local/provider-specific generation config
     ollama_base_url: str = Field(default="http://localhost:11434", alias="OLLAMA_BASE_URL")
     ollama_script_model: str = Field(default="llama3.2", alias="OLLAMA_SCRIPT_MODEL")
     ollama_timeout_seconds: int = Field(default=10, alias="OLLAMA_TIMEOUT_SECONDS")
 
-    # Database - use Render disk path in production
+    # Database
     database_url: str = Field(
-        default="sqlite:///./data/app.db",
+        default="sqlite+aiosqlite:///./data/app.db",
         alias="DATABASE_URL",
     )
     checkpoint_db_url: str = Field(
-        default="sqlite:///./data/checkpoints.db",
+        default="sqlite+aiosqlite:///./data/checkpoints.db",
         validation_alias=AliasChoices("CHECKPOINT_DB_URL", "CHECKPOINT_DB"),
     )
     allowed_origins: str = Field(default="http://localhost:5173,http://localhost:3000", alias="ALLOWED_ORIGINS")

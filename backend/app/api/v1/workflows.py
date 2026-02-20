@@ -4,11 +4,12 @@ import time
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_db_session, get_workflow_engine
+from app.api.deps import get_db_session, get_workflow_engine, get_cache
 from app.models.database import WorkflowRecord
+from app.services.redis_client import RedisCache
 from app.agents.ab_test_orchestrator import ABTestOrchestratorAgent
 from app.models.state import (
     ContentWorkflowState,
@@ -29,15 +30,21 @@ router = APIRouter()
 async def list_workflows(
     user_id: str | None = Query(default=None),
     session: AsyncSession = Depends(get_db_session),
+    cache: RedisCache = Depends(get_cache),
 ) -> list[WorkflowSummaryResponse]:
+    cache_key = f"workflows_list:{user_id or 'all'}"
+    cached = await cache.get(cache_key)
+    if cached:
+        return cached
+
     statement = select(WorkflowRecord)
     if user_id:
         statement = statement.where(WorkflowRecord.user_id == user_id)
     statement = statement.order_by(WorkflowRecord.updated_ts.desc())
-    result = await session.exec(statement)
-    records = result.all()
+    result = await session.execute(statement)
+    records = result.scalars().all()
 
-    return [
+    response = [
         WorkflowSummaryResponse(
             workflow_id=record.id,
             topic=record.topic,
@@ -48,6 +55,9 @@ async def list_workflows(
         )
         for record in records
     ]
+    
+    await cache.set(cache_key, response, ttl=60)
+    return response
 
 
 @router.post("/start", response_model=WorkflowStatusResponse)
@@ -55,6 +65,7 @@ async def start_workflow(
     payload: WorkflowStartRequest,
     session: AsyncSession = Depends(get_db_session),
     workflow_engine: ContentWorkflow = Depends(get_workflow_engine),
+    cache: RedisCache = Depends(get_cache),
 ) -> WorkflowStatusResponse:
     workflow_id = str(uuid.uuid4())
     now = int(time.time())
@@ -102,6 +113,7 @@ async def start_workflow(
 
     session.add(record)
     await session.commit()
+    await cache.delete_pattern("workflows_list:*")
 
     return _to_response(result)
 
@@ -112,8 +124,8 @@ async def workflow_status(
     session: AsyncSession = Depends(get_db_session),
 ) -> WorkflowStatusResponse:
     statement = select(WorkflowRecord).where(WorkflowRecord.id == workflow_id)
-    result = await session.exec(statement)
-    record = result.one_or_none()
+    result = await session.execute(statement)
+    record = result.scalar_one_or_none()
 
     if not record:
         raise HTTPException(status_code=404, detail="Workflow not found")
@@ -127,10 +139,11 @@ async def approve_workflow(
     payload: WorkflowApproveRequest,
     session: AsyncSession = Depends(get_db_session),
     workflow_engine: ContentWorkflow = Depends(get_workflow_engine),
+    cache: RedisCache = Depends(get_cache),
 ) -> WorkflowStatusResponse:
     statement = select(WorkflowRecord).where(WorkflowRecord.id == workflow_id)
-    result = await session.exec(statement)
-    record = result.one_or_none()
+    result = await session.execute(statement)
+    record = result.scalar_one_or_none()
 
     if not record:
         raise HTTPException(status_code=404, detail="Workflow not found")
@@ -168,6 +181,7 @@ async def approve_workflow(
 
     session.add(record)
     await session.commit()
+    await cache.delete_pattern("workflows_list:*")
 
     return _to_response(updated_state)
 
@@ -178,10 +192,11 @@ async def select_thumbnail(
     payload: WorkflowThumbnailSelectRequest,
     session: AsyncSession = Depends(get_db_session),
     workflow_engine: ContentWorkflow = Depends(get_workflow_engine),
+    cache: RedisCache = Depends(get_cache),
 ) -> WorkflowStatusResponse:
     statement = select(WorkflowRecord).where(WorkflowRecord.id == workflow_id)
-    result = await session.exec(statement)
-    record = result.one_or_none()
+    result = await session.execute(statement)
+    record = result.scalar_one_or_none()
 
     if not record:
         raise HTTPException(status_code=404, detail="Workflow not found")
@@ -207,6 +222,7 @@ async def select_thumbnail(
 
     session.add(record)
     await session.commit()
+    await cache.delete_pattern("workflows_list:*")
 
     return _to_response(updated_state)
 
@@ -257,8 +273,8 @@ async def get_ab_test_status(
     Frontend polls this every 5-10 seconds during testing phase.
     """
     statement = select(WorkflowRecord).where(WorkflowRecord.id == workflow_id)
-    result = await session.exec(statement)
-    record = result.one_or_none()
+    result = await session.execute(statement)
+    record = result.scalar_one_or_none()
 
     if not record:
         raise HTTPException(status_code=404, detail="Workflow not found")
@@ -296,14 +312,15 @@ async def declare_winner_manually(
     request: DeclareWinnerRequest,
     session: AsyncSession = Depends(get_db_session),
     workflow_engine: ContentWorkflow = Depends(get_workflow_engine),
+    cache: RedisCache = Depends(get_cache),
 ) -> WorkflowStatusResponse:
     """
     Manual override to declare a winner before statistical significance.
     Human sovereignty over AI decision.
     """
     statement = select(WorkflowRecord).where(WorkflowRecord.id == workflow_id)
-    result = await session.exec(statement)
-    record = result.one_or_none()
+    result = await session.execute(statement)
+    record = result.scalar_one_or_none()
 
     if not record:
         raise HTTPException(status_code=404, detail="Workflow not found")
@@ -329,6 +346,7 @@ async def declare_winner_manually(
 
     session.add(record)
     await session.commit()
+    await cache.delete_pattern("workflows_list:*")
 
     return _to_response(updated_state)
 
@@ -339,14 +357,15 @@ async def stop_ab_test(
     request: StopTestRequest,
     session: AsyncSession = Depends(get_db_session),
     workflow_engine: ContentWorkflow = Depends(get_workflow_engine),
+    cache: RedisCache = Depends(get_cache),
 ) -> WorkflowStatusResponse:
     """
     Stop A/B test early without declaring winner (inconclusive).
     Picks current best performer.
     """
     statement = select(WorkflowRecord).where(WorkflowRecord.id == workflow_id)
-    result = await session.exec(statement)
-    record = result.one_or_none()
+    result = await session.execute(statement)
+    record = result.scalar_one_or_none()
 
     if not record:
         raise HTTPException(status_code=404, detail="Workflow not found")
@@ -374,6 +393,7 @@ async def stop_ab_test(
 
         session.add(record)
         await session.commit()
+        await cache.delete_pattern("workflows_list:*")
 
         return _to_response(updated_state)
 
@@ -390,8 +410,8 @@ async def get_final_results(
     Includes winning script, winning thumbnail, and A/B test statistics.
     """
     statement = select(WorkflowRecord).where(WorkflowRecord.id == workflow_id)
-    result = await session.exec(statement)
-    record = result.one_or_none()
+    result = await session.execute(statement)
+    record = result.scalar_one_or_none()
 
     if not record:
         raise HTTPException(status_code=404, detail="Workflow not found")

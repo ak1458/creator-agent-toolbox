@@ -1,10 +1,9 @@
 ﻿from collections.abc import AsyncGenerator
 
-from sqlalchemy import Column, JSON
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy import JSON, String, Integer
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.pool import NullPool
-from sqlmodel import Field, SQLModel
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import get_settings
 from app.core.logger import get_logger
@@ -38,22 +37,26 @@ else:
 SessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
-class WorkflowRecord(SQLModel, table=True):
+class Base(DeclarativeBase):
+    pass
+
+
+class WorkflowRecord(Base):
     __tablename__ = "workflows"
 
-    id: str = Field(primary_key=True)
-    user_id: str = Field(index=True)
-    topic: str
-    target_platforms: list[str] = Field(default_factory=list, sa_column=Column(JSON))
-    status: str = Field(index=True)
-    state_snapshot: dict = Field(default_factory=dict, sa_column=Column(JSON))
-    created_ts: int = Field(index=True)
-    updated_ts: int = Field(index=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str] = mapped_column(String, index=True)
+    topic: Mapped[str] = mapped_column(String)
+    target_platforms: Mapped[list[str]] = mapped_column(JSON, default=list)
+    status: Mapped[str] = mapped_column(String, index=True)
+    state_snapshot: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_ts: Mapped[int] = mapped_column(Integer, index=True)
+    updated_ts: Mapped[int] = mapped_column(Integer, index=True)
 
 
 async def init_db() -> None:
     async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
+        await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:

@@ -4,6 +4,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { approveWorkflow, getWorkflow, selectThumbnail } from '../api/workflows'
 import { ScriptVariant } from '../components/ScriptVariant'
 import { ThumbnailVariant } from '../components/ThumbnailVariant'
+import { ReviewSkeleton } from '../components/ReviewSkeleton'
+import { ThumbnailSkeleton } from '../components/ThumbnailSkeleton'
+import { toast } from 'react-hot-toast'
 
 export function Review() {
   const { id } = useParams<{ id: string }>()
@@ -77,7 +80,11 @@ export function Review() {
         queryClient.invalidateQueries({ queryKey: ['workflow', id] }),
         queryClient.invalidateQueries({ queryKey: ['workflows'] }),
       ])
+      toast.success('Script approved successfully!')
     },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Error approving script')
+    }
   })
 
   const rejectMutation = useMutation({
@@ -96,7 +103,11 @@ export function Review() {
         queryClient.invalidateQueries({ queryKey: ['workflow', id] }),
         queryClient.invalidateQueries({ queryKey: ['workflows'] }),
       ])
+      toast.success('Scripts rejected, regenerating...')
     },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Error rejecting scripts')
+    }
   })
 
   const selectThumbnailMutation = useMutation({
@@ -113,9 +124,13 @@ export function Review() {
         queryClient.invalidateQueries({ queryKey: ['workflow', id] }),
         queryClient.invalidateQueries({ queryKey: ['workflows'] }),
       ])
+      toast.success('Thumbnail selected! Starting A/B test...')
       // Navigate to AB test monitor after thumbnail selection
       navigate(`/workflows/${id}/ab-test`)
     },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Error selecting thumbnail')
+    }
   })
 
   const activeError = useMemo(() => {
@@ -197,7 +212,8 @@ export function Review() {
       </section>
 
       {/* Stage 1: Script Selection */}
-      {(isScriptStage || workflow.scripts.length > 0) && (
+      {workflow.status === 'generating_scripts' && <ReviewSkeleton />}
+      {(isScriptStage || workflow.scripts.length > 0) && workflow.status !== 'generating_scripts' && (
         <section className="panel">
           <h2>Script Variants</h2>
           {!workflow.scripts.length ? <p>No script variants available yet.</p> : null}
@@ -239,15 +255,7 @@ export function Review() {
       )}
 
       {/* Loading: Generating Thumbnails */}
-      {isGeneratingThumbnails && (
-        <section className="panel">
-          <h2>Generating Thumbnails</h2>
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Generating thumbnails via AI...</p>
-          </div>
-        </section>
-      )}
+      {isGeneratingThumbnails && <ThumbnailSkeleton />}
 
       {/* Stage 2: Thumbnail Selection */}
       {(isThumbnailStage || workflow.thumbnails.length > 0) && !isGeneratingThumbnails && (
@@ -305,8 +313,8 @@ export function Review() {
             {workflow.selected_thumbnail_id && workflow.thumbnails.find(t => t.id === workflow.selected_thumbnail_id)?.image_url && (
               <div className="completion-item">
                 <strong>Selected Thumbnail:</strong>
-                <img 
-                  src={workflow.thumbnails.find(t => t.id === workflow.selected_thumbnail_id)?.image_url} 
+                <img
+                  src={workflow.thumbnails.find(t => t.id === workflow.selected_thumbnail_id)?.image_url}
                   alt="Selected thumbnail"
                   className="completion-thumbnail"
                 />

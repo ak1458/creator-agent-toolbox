@@ -2,18 +2,18 @@ version: "3.9"
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16
     container_name: cat-postgres
     environment:
-      POSTGRES_DB: cat_toolbox
+      POSTGRES_DB: cat_prod
       POSTGRES_USER: dev
-      POSTGRES_PASSWORD: devpass
+      POSTGRES_PASSWORD: dev
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d cat_toolbox"]
+      test: [ "CMD-SHELL", "pg_isready -U dev -d cat_toolbox" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -26,7 +26,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -44,8 +44,8 @@ services:
       OLLAMA_SCRIPT_MODEL: ${OLLAMA_SCRIPT_MODEL:-llama3.2}
       OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-10}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://dev:devpass@postgres:5432/cat_toolbox}
-      CHECKPOINT_DB_URL: ${CHECKPOINT_DB_URL:-postgresql+asyncpg://dev:devpass@postgres:5432/cat_toolbox}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://dev:dev@postgres:5432/cat_prod}
+      CHECKPOINT_DB_URL: ${CHECKPOINT_DB_URL:-postgresql+asyncpg://dev:dev@postgres:5432/cat_prod}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-300}
       DEBUG: ${DEBUG:-false}
@@ -62,7 +62,7 @@ services:
 
   # SQLite fallback profile for local development without Docker
   backend-sqlite:
-    profiles: ["sqlite"]
+    profiles: [ "sqlite" ]
     build:
       context: ./backend
       dockerfile: Dockerfile

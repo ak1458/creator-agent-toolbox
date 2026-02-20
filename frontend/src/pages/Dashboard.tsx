@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../api/client'
 import { listWorkflows, startWorkflow } from '../api/workflows'
 import { WorkflowCard } from '../components/WorkflowCard'
+import { DashboardEmpty } from '../components/DashboardEmpty'
 import { useWorkflowStore } from '../stores/workflowStore'
+import { toast } from 'react-hot-toast'
 
 function topicPlaceholder() {
   return 'e.g. iPhone Battery Tips'
@@ -44,10 +46,13 @@ export function Dashboard() {
       setTopic('')
       setSelectedWorkflowId(workflow.workflow_id)
       await queryClient.invalidateQueries({ queryKey: ['workflows'] })
+      toast.success('Workflow created successfully!')
       navigate(`/workflows/${workflow.workflow_id}`)
     },
     onError: (error) => {
-      setCreateError(error instanceof Error ? error.message : 'Failed to start workflow')
+      const msg = error instanceof Error ? error.message : 'Failed to start workflow'
+      setCreateError(msg)
+      toast.error(msg)
     },
   })
 
@@ -68,6 +73,7 @@ export function Dashboard() {
         <p>Start a script workflow and route it to human approval.</p>
         <form onSubmit={handleSubmit}>
           <input
+            id="topic-input"
             type="text"
             value={topic}
             onChange={(event) => setTopic(event.target.value)}
@@ -100,14 +106,24 @@ export function Dashboard() {
           </button>
         </div>
 
-        {workflowsQuery.isLoading ? <p>Loading workflows...</p> : null}
+        {workflowsQuery.isLoading ? (
+          <div className="workflow-grid">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="panel skeleton skeleton-card"></div>
+            ))}
+          </div>
+        ) : null}
+
         {workflowsQuery.error ? <p className="error-text">Failed to load workflows</p> : null}
 
-        <div className="workflow-grid">
-          {workflowsQuery.data?.map((workflow) => (
-            <WorkflowCard key={workflow.workflow_id} workflow={workflow} />
-          ))}
-        </div>
+        {workflowsQuery.data && (
+          <div className="workflow-grid">
+            {workflowsQuery.data.map((workflow) => (
+              <WorkflowCard key={workflow.workflow_id} workflow={workflow} />
+            ))}
+            {workflowsQuery.data.length === 0 && <DashboardEmpty />}
+          </div>
+        )}
       </section>
     </section>
   )

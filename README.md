@@ -1,54 +1,90 @@
-# Creator Agent Toolbox 🚀
+# Creator Agent Toolbox (CAT)
 
-A comprehensive suite of AI-powered tools for content creators, designed to streamline video production workflows from trend analysis to multivariant A/B testing.
+AI-powered content creation with A/B testing optimization.
 
-## 🏗️ Architecture
+## What It Does
 
-- **Backend**: FastAPI paired with LangGraph for complex agentic workflows.
-- **AI Engine**: Groq (Llama-3-70b-versatile via OpenAI compatibility) for rapid script generation.
-- **Frontend**: React + Vite + Tailwind CSS for a premium, responsive dashboard.
-- **Database**: SQLModel with a persistent SQLite disk for stateless deployment stability.
+- Generates 3 script variants optimized for retention
+- Creates 3 thumbnail visuals automatically  
+- A/B tests combinations with statistical significance (95% confidence)
+- Declares winner based on CTR data
 
-## 🌟 Key Features
+## Tech Stack
 
-### 1. Agentic Workflow Engine
+- Backend: Python 3.11, FastAPI, LangGraph, SQLAlchemy 2.0
+- Frontend: React 18, TypeScript, Vite, TailwindCSS, Zustand
+- AI: Ollama (local) / Groq API (cloud), Pollinations.ai (thumbnails)
+- Database: SQLite (local) / PostgreSQL (production-ready)
 
-An automated pipeline that coordinates multiple specialized agents:
+## Quick Start (Local)
 
-- **Trend Analyst**: Scours niches for high-performing content patterns.
-- **Script Architect**: Drafts 3 distinct script variants based on viral structures.
-- **Visual Engineer**: Generates high-conversion thumbnail prompts.
+### Prerequisites
 
-### 2. Multi-Variant A/B Testing
+- Python 3.11+
+- Node.js 20+
+- Ollama installed (optional, for local LLM)
 
-Live monitoring of content performance variants with automated winner declaration or manual override.
+### Backend Setup
 
-### 3. Workflow Persistence
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
+```
 
-Stateful checkpointer allows pausing and resuming long-running creative processes.
+### Frontend Setup
 
-## 🚀 Deployment
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### Backend (Render)
+### Environment
 
-- **Runtime**: Python 3.11
-- **Disk**: 1GB persistent disk mounted at `/opt/render/project/src/data`
-- **LLM**: Powered by Groq for ultra-low latency generation.
+Copy `.env.example` to `.env` and fill:
 
-### Frontend (Vercel)
+- `OPENAI_API_KEY` (for Groq: gsk_...)
+- `DATABASE_URL` (defaults to SQLite)
 
-- Automated CI/CD deployments from the `frontend` root directory.
-- Dynamic API client routing for cross-origin production requests.
+## Architecture
 
----
+```mermaid
+graph TD
+    A[Input Topic] --> B[Trend Analysis]
+    B --> C[Generate Scripts]
+    C --> D[Human Approval]
+    D --> E[Generate Thumbnails]
+    E --> F[Human Approval]
+    F --> G[A/B Test Engine]
+    G --> H[Winner Declared]
+```
 
-## 📈 Future Scaling Roadmap
+## API Endpoints
 
-- **Vector Database Integration**: Move from SQLite to Pinecone or PGVector for RAG-based content memory.
-- **Distributed Caching**: Implement Redis (upgradable from current local-first cache) for high-traffic script retrieval.
-- **Multi-Platform Adapters**: Expand from YouTube-centric logic to Instagram Reels, TikTok, and LinkedIn.
-- **User Authentication**: Implement OAuth2 support for team-based workspaces.
+- `POST /api/v1/workflows/start` - Create workflow
+- `GET /api/v1/workflows/{id}` - Check status
+- `POST /api/v1/workflows/{id}/approve` - Approve script
+- `POST /api/v1/workflows/{id}/select-thumbnail` - Select visual
+- `GET /api/v1/workflows/{id}/ab-status` - A/B test metrics
 
----
+## Deployment Notes
 
-*Built withsenior developer standards for high performance and scalability.*
+Code is production-ready for:
+
+- Railway ($5-20/month)
+- AWS ECS + RDS ($60-80/month)
+
+*Note: We are using a Hybrid Development Model. Local development uses SQLite and in-memory caching to save resources. When deployed with production environment variables, it seamlessly activates PostgreSQL and Redis.*
+
+## Screenshots
+
+[Placeholder: Dashboard with workflows]
+[Placeholder: Review page with script variants]
+[Placeholder: A/B Test monitor with CTR chart]
+
+## License
+
+MIT

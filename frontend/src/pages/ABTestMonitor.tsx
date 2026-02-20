@@ -6,6 +6,7 @@ import { ConfidenceMeter } from '../components/ab-testing/ConfidenceMeter'
 import { VariantCard } from '../components/ab-testing/VariantCard'
 import { TestTimer } from '../components/ab-testing/TestTimer'
 import { WinnerModal } from '../components/ab-testing/WinnerModal'
+import { ABTestWaiting } from '../components/ABTestWaiting'
 import { useWorkflow } from '../hooks/useWorkflow'
 
 export function ABTestMonitor() {
@@ -96,11 +97,17 @@ export function ABTestMonitor() {
       {/* Main Grid */}
       <div className="dashboard-grid">
         {/* Left: Charts */}
-        <div className="workflow-list-section" style={{ gridColumn: 'span 8' }}>
-          <CTRChart variants={data.variants} />
-          <div style={{ marginTop: '16px' }}>
-            <ConfidenceMeter confidence={data.current_confidence} />
-          </div>
+        <div className="workflow-list-section" style={{ gridColumn: 'span 8', minHeight: '256px', width: '100%', overflow: 'hidden' }}>
+          {data.is_running && data.total_impressions < 50 ? (
+            <ABTestWaiting impressions={data.total_impressions} />
+          ) : (
+            <>
+              <CTRChart variants={data.variants} />
+              <div style={{ marginTop: '16px' }}>
+                <ConfidenceMeter confidence={data.current_confidence} />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right: Stats & Controls */}
@@ -127,8 +134,8 @@ export function ABTestMonitor() {
                     cursor: data.is_running ? 'pointer' : 'not-allowed',
                   }}
                 >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">
+                  <div className="flex justify-between items-center w-full">
+                    <span className="font-medium truncate" style={{ maxWidth: '70%' }}>
                       {variant.style.replace(/_/g, ' ').toLowerCase()}
                     </span>
                     <span className="font-bold" style={{ color: 'var(--run)' }}>

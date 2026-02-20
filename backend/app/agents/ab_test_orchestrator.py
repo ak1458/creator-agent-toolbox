@@ -16,7 +16,7 @@ class ABTestOrchestratorAgent(BaseAgent):
     """
 
     def __init__(self):
-        super().__init__("ABTestOrchestrator")
+        super().__init__(name="ab_test_orchestrator")
         self.statistics = ABTestStatistics()
         self.check_interval_seconds = 30  # Check every 30s (accelerated for demo)
         self.max_test_duration_hours = 72  # Auto-stop after 72h

@@ -53,7 +53,13 @@ p {
 .app-shell {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 28px 20px 32px;
+  padding: 32px;
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    padding: 16px;
+  }
 }
 
 .top-bar {
@@ -303,6 +309,12 @@ button:disabled {
   font-weight: 500;
 }
 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Thumbnail Selection Styles */
 .thumbnail-grid {
   margin-top: 16px;
@@ -439,6 +451,7 @@ button:disabled {
 }
 
 @media (max-width: 900px) {
+
   .new-workflow-panel,
   .health-panel,
   .workflow-list-section {
@@ -452,4 +465,36 @@ button:disabled {
   .thumbnail-grid {
     grid-template-columns: 1fr;
   }
+
+  .script-grid,
+  .action-row {
+    flex-direction: column;
+  }
+}
+
+/* Skeletons */
+@keyframes pulse-bg {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton {
+  animation: pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: var(--line);
+  border-radius: 8px;
+}
+
+.skeleton-card {
+  height: 180px;
+  border-radius: 16px;
+  border: 1px solid var(--panel-border);
+  background-color: var(--panel-bg);
+  opacity: 0.7;
 }
