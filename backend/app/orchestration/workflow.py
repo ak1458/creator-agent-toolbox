@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 from typing import Literal
 
-from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+from langgraph.checkpoint.aiosqlite import AsyncSqliteSaver
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
 
