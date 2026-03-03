@@ -1,0 +1,35 @@
+2026-03-03 15:09:59 [info     ] user_created                   email=demo@example.com user_id=0497cf17-7b59-45dd-8931-1b573c51fb72
+2026-03-03 15:09:59 [info     ] demo_user_created              user_id=0497cf17-7b59-45dd-8931-1b573c51fb72
+2026-03-03 15:09:59 [info     ] database_engine_sqlite
+INFO:     Started server process [21839]
+INFO:     Waiting for application startup.
+{"database_url": "sqlite+aiosqlite:///./data/app.db", "redis_url": "redis://localhost:6379/0", "event": "startup", "level": "info", "timestamp": "2026-03-03T15:10:01.838323Z"}
+{"error": "Error 111 connecting to localhost:6379. Connection refused.", "event": "redis_connection_failed", "level": "warning", "timestamp": "2026-03-03T15:10:01.848344Z"}
+{"checkpoint": "./data/checkpoints.db", "event": "workflow_initialized", "level": "info", "timestamp": "2026-03-03T15:10:01.854745Z"}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:45996 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45998 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45998 - "OPTIONS /api/v1/workflows/start HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:45998 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45998 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50954 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38382 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38390 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38390 - "OPTIONS /api/v1/workflows/start HTTP/1.1" 200 OK
+{"topic": "Test Topic 123", "event": "fetching_real_trends", "level": "info", "timestamp": "2026-03-03T15:18:43.865855Z"}
+{"event": "perplexity_api_key_missing", "level": "warning", "timestamp": "2026-03-03T15:18:43.866097Z"}
+{"event": "youtube_api_key_missing_falling_back_to_mock", "level": "warning", "timestamp": "2026-03-03T15:18:43.866255Z"}
+{"event": "perplexity_api_failed_falling_back_to_mock", "level": "warning", "timestamp": "2026-03-03T15:18:43.866620Z"}
+{"workflow_id": "23d71f0e-6dda-4f21-9707-8a42dd09d59b", "event": "trend_analysis_complete", "level": "info", "timestamp": "2026-03-03T15:18:43.866759Z"}
+{"workflow_id": "23d71f0e-6dda-4f21-9707-8a42dd09d59b", "provider": "ollama", "reason": "All connection attempts failed", "event": "script_generation_fallback", "level": "warning", "timestamp": "2026-03-03T15:18:43.926124Z"}
+{"workflow_id": "23d71f0e-6dda-4f21-9707-8a42dd09d59b", "variants": 3, "provider": "ollama", "tokens": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}, "event": "scripts_generated", "level": "info", "timestamp": "2026-03-03T15:18:43.926478Z"}
+INFO:     127.0.0.1:38382 - "POST /api/v1/workflows/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38382 - "GET /api/v1/workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38382 - "GET /api/v1/workflows/23d71f0e-6dda-4f21-9707-8a42dd09d59b/status HTTP/1.1" 200 OK
