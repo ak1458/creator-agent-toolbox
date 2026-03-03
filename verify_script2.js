@@ -1,0 +1,34 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.goto('http://localhost:5173');
+
+  // Wait for the app to load
+  await page.waitForSelector('text=Creator Agent Toolbox', { timeout: 10000 });
+
+  // Wait to make sure the Backend Health shows Status: ok
+  try {
+     await page.waitForSelector('text=Status: ok', { timeout: 5000 });
+     console.log("SUCCESS: Backend is healthy.");
+  } catch (err) {
+     console.error("FAILED: Backend health failed.");
+     await page.screenshot({ path: 'verify_health.png' });
+  }
+
+  // Create a new workflow
+  await page.fill('input[placeholder="e.g. iPhone Battery Tips"]', 'Test Topic 123');
+  await page.click('button:has-text("Create Workflow")');
+
+  try {
+    // Wait to see if a workflow appears
+    await page.waitForSelector('text=Test Topic 123', { timeout: 15000 });
+    console.log("SUCCESS: Workflow created and listed!");
+  } catch (err) {
+    console.error("FAILED: Could not find created workflow.");
+    await page.screenshot({ path: 'verify_error2.png' });
+  }
+
+  await browser.close();
+})();
