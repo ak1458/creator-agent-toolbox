@@ -22,7 +22,7 @@ python-jose = { extras = ["cryptography"], version = "^3.3.0" }  # Alternative J
 passlib = { extras = ["bcrypt"], version = "^1.7.4" }  # Password hashing
 gunicorn = "^21.2.0"  # Production WSGI server
 pydantic-settings = "^2.1.0"
-python-multipart = "^0.0.6"
+python-multipart = ">=0.0.6,<0.0.32"
 httpx = "^0.26.0"
 structlog = "^24.1.0"
 
