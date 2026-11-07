@@ -1,97 +1,50 @@
-# Creator Agent Toolbox (CAT)
+# Creator Agent Toolbox
 
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-LangGraph-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
-[![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-000000?logo=ollama&logoColor=white)](https://ollama.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+A content workflow application with script review, thumbnail selection, and an A/B-testing dashboard.
 
+[![Python: Backend](https://img.shields.io/badge/Python-Backend-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
+[![FastAPI: API](https://img.shields.io/badge/FastAPI-API-009688?style=flat-square&logo=fastapi&logoColor=white)](backend/app/main.py)
+[![React: UI](https://img.shields.io/badge/React-UI-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-64748B?style=flat-square)](LICENSE)
 
-AI-powered content creation with A/B testing optimization.
+[Handoff](HANDOFF.md) · [Beta checklist](BETA_CHECKLIST.md) · [Deployment](DEPLOY.md)
 
-## What It Does
+## What is here
 
-- Generates 3 script variants optimized for retention
-- Creates 3 thumbnail visuals automatically  
-- A/B tests combinations with statistical significance (95% confidence)
-- Declares winner based on CTR data
+- FastAPI endpoints and LangGraph-based workflow orchestration.
+- Script variants followed by explicit review and approval steps.
+- Thumbnail selection and experiment-monitoring screens.
+- SQLite persistence with configurable generation providers.
 
-## Tech Stack
+## Run locally
 
-- Backend: Python 3.11, FastAPI, LangGraph, SQLAlchemy 2.0
-- Frontend: React 18, TypeScript, Vite, TailwindCSS, Zustand
-- AI: Ollama (local) / Groq API (cloud), Pollinations.ai (thumbnails)
-- Database: SQLite (local) / PostgreSQL (production-ready)
-
-## Quick Start (Local)
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 20+
-- Ollama installed (optional, for local LLM)
-
-### Backend Setup
+Backend:
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+python -m venv .venv
+# Activate .venv for your shell, then:
+python -m pip install -r requirements.txt
+cp .env.example .env
 python -m uvicorn app.main:app --reload
 ```
 
-### Frontend Setup
+Frontend, in another terminal from the repository root:
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-### Environment
+Review [backend configuration](backend/app/core/config.py) for provider, database, secret, and origin settings. Configuration is environment-specific; paid providers need credentials.
 
-Copy `.env.example` to `.env` and fill:
+## Current limits
 
-- `OPENAI_API_KEY` (for Groq: gsk_...)
-- `DATABASE_URL` (defaults to SQLite)
+The repository includes a mock analytics provider for A/B demonstrations. Simulated CTR or confidence values do not demonstrate live YouTube performance. Review [the handoff](HANDOFF.md) and [beta checklist](BETA_CHECKLIST.md) before connecting external services or claiming production readiness.
 
-## Architecture
-
-```mermaid
-graph TD
-    A[Input Topic] --> B[Trend Analysis]
-    B --> C[Generate Scripts]
-    C --> D[Human Approval]
-    D --> E[Generate Thumbnails]
-    E --> F[Human Approval]
-    F --> G[A/B Test Engine]
-    G --> H[Winner Declared]
-```
-
-## API Endpoints
-
-- `POST /api/v1/workflows/start` - Create workflow
-- `GET /api/v1/workflows/{id}` - Check status
-- `POST /api/v1/workflows/{id}/approve` - Approve script
-- `POST /api/v1/workflows/{id}/select-thumbnail` - Select visual
-- `GET /api/v1/workflows/{id}/ab-status` - A/B test metrics
-
-## Deployment Notes
-
-Code is production-ready for:
-
-- Railway ($5-20/month)
-- AWS ECS + RDS ($60-80/month)
-
-*Note: We are using a Hybrid Development Model. Local development uses SQLite and in-memory caching to save resources. When deployed with production environment variables, it seamlessly activates PostgreSQL and Redis.*
-
-## Screenshots
-
-[Placeholder: Dashboard with workflows]
-[Placeholder: Review page with script variants]
-[Placeholder: A/B Test monitor with CTR chart]
+The active application is in `backend/` and `frontend/`; historical generator attempts and run logs should be reviewed in a separate source-cleanup pass.
 
 ## License
 
-MIT
+Copyright © 2026 Ashraf Kamal. Reuse is restricted by [LICENSE](LICENSE).
