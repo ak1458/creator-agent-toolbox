@@ -32,6 +32,7 @@ google-auth-oauthlib = "^1.2.0"
 google-auth-httplib2 = "^0.2.0"
 google-api-python-client = "^2.118.0"  # YouTube Data API
 requests = "^2.31.0"  # For Perplexity API calls
+bcrypt = "4.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
